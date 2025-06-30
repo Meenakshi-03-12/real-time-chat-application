@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chattrix - Real-time Chat</title>
+    <style>
+      :root {
+        --primary: #47c3fd;
+        --accent: #40ffca;
+        --secondary: #950ece;
+        --dark: #2d2d3a;
+        --light: #f8f9fa;
+        --success: #28a745;
+        --warning: #ffc107;
+        --danger: #dc3545;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+        background-color: var(--light);
+        color: var(--dark);
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .chat-container {
+        width: 100%;
+        max-width: 800px;
+        height: 90vh;
+        margin: 0 auto;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        background: white;
+      }
+
+      .chat-header {
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: white;
+        padding: 15px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .chat-header h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+      }
+
+      .chat-header p {
+        font-size: 0.8rem;
+        opacity: 0.8;
+      }
+
+      .chat-messages {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        background-color: rgba(71, 195, 253, 0.05);
+      }
+
+      .message {
+        max-width: 70%;
+        padding: 12px 15px;
+        border-radius: 15px;
+        position: relative;
+        animation: fadeIn 0.3s ease-out;
+      }
+
+      .received {
+        align-self: flex-start;
+        background-color: white;
+        border-top-left-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      .sent {
+        align-self: flex-end;
+        background: linear-gradient(135deg, var(--primary), var(--accent));
+        color: white;
+        border-top-right-radius: 5px;
+      }
+
+      .message-time {
+        font-size: 0.7rem;
+        opacity: 0.7;
+        margin-top: 5px;
+        text-align: right;
+      }
+
+      .chat-input {
+        display: flex;
+        padding: 15px;
+        background-color: white;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+      }
+
+      .chat-input input {
+        flex: 1;
+        padding: 12px 15px;
+        border: 2px solid rgba(71, 195, 253, 0.3);
+        border-radius: 25px;
+        outline: none;
+        font-size: 1rem;
+        transition: all 0.3s;
+      }
+
+      .chat-input input:focus {
+        border-color: var(--primary);
+      }
+
+      .chat-input button {
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: white;
+        border: none;
+        border-radius: 25px;
+        padding: 0 25px;
+        margin-left: 10px;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 600;
+        transition: all 0.3s;
+      }
+
+      .chat-input button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(71, 195, 253, 0.4);
+      }
+
+      .status {
+        text-align: center;
+        padding: 5px;
+        font-size: 0.8rem;
+        background-color: var(--accent);
+        color: var(--dark);
+      }
+
+      .typing {
+        display: inline-block;
+        height: 20px;
+        line-height: 20px;
+        overflow: hidden;
+        vertical-align: bottom;
+      }
+
+      .typing span {
+        display: inline-block;
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background-color: var(--dark);
+        margin: 0 2px;
+        animation: typing 1s infinite;
+      }
+
+      .typing span:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+
+      .typing span:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+
+      @keyframes typing {
+        0%,
+        100% {
+          transform: translateY(0);
+          opacity: 0.5;
+        }
+        50% {
+          transform: translateY(-5px);
+          opacity: 1;
+        }
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (max-width: 600px) {
+        .chat-container {
+          height: 100vh;
+          border-radius: 0;
+        }
+
+        .message {
+          max-width: 85%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="chat-container">
+      <div class="chat-header">
+        <h1>Chattrix</h1>
+        <p>Real-time messaging</p>
+      </div>
+
+      <div class="status" id="status">
+        <span id="status-text">Connecting...</span>
+        <span class="typing" id="typing-indicator" style="display: none">
+          <span></span>
+          <span></span>
+          <span></span>
+        </span>
+      </div>
+
+      <div class="chat-messages" id="chat-messages">
+        <!-- Messages will appear here -->
+      </div>
+
+      <div class="chat-input">
+        <input
+          type="text"
+          id="message-input"
+          placeholder="Type your message..."
+          autocomplete="off"
+        />
+        <button id="send-button">Send</button>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Connect to WebSocket server (in a real app, this would be your backend URL)
+        const wsProtocol =
+          window.location.protocol === "https:" ? "wss://" : "ws://";
+        const wsUrl = wsProtocol + window.location.host + "/ws"; // Adjust this to your actual WebSocket endpoint
+        const socket = new WebSocket("ws://localhost:8080"); // For demo, we'll mock this
+
+        const statusText = document.getElementById("status-text");
+        const typingIndicator = document.getElementById("typing-indicator");
+        const chatMessages = document.getElementById("chat-messages");
+        const messageInput = document.getElementById("message-input");
+        const sendButton = document.getElementById("send-button");
+
+        let username = "User" + Math.floor(Math.random() * 1000);
+        let lastTypingTime = 0;
+        let isTyping = false;
+
+        // Mock WebSocket connection (in reality, you'd have a backend handling this)
+        setTimeout(() => {
+          statusText.textContent = "Connected as " + username;
+        }, 1000);
+
+        // Mock receiving messages (in reality, these would come from WebSocket)
+        const sampleMessages = [
+          {
+            text: "Hey there! How are you doing today?",
+            sender: "Bot",
+            time: "10:30 AM",
+            type: "received",
+          },
+          {
+            text: "I'm doing great! Just working on this new chat app.",
+            sender: username,
+            time: "10:31 AM",
+            type: "sent",
+          },
+          {
+            text: "That sounds interesting! What technologies are you using?",
+            sender: "Bot",
+            time: "10:32 AM",
+            type: "received",
+          },
+          {
+            text: "Using WebSockets for real-time communication and vanilla JavaScript for the frontend.",
+            sender: username,
+            time: "10:33 AM",
+            type: "sent",
+          },
+          {
+            text: "Nice! The color scheme looks really vibrant. What are the main colors?",
+            sender: "Bot",
+            time: "10:34 AM",
+            type: "received",
+          },
+          {
+            text: "The primary colors are #47C3FD (blue), #40FFCA (teal), and #950ECE (purple).",
+            sender: username,
+            time: "10:35 AM",
+            type: "sent",
+          },
+        ];
+
+        // Display sample messages with delay to simulate chat history
+        sampleMessages.forEach((msg, i) => {
+          setTimeout(() => {
+            addMessage(msg.text, msg.sender, msg.time, msg.type);
+          }, 200 * i);
+        });
+
+        // Function to add a new message to the chat
+        function addMessage(text, sender, time, type) {
+          const messageElement = document.createElement("div");
+          messageElement.classList.add("message", type);
+
+          const messageText = document.createElement("div");
+          messageText.textContent = text;
+
+          const messageTime = document.createElement("div");
+          messageTime.classList.add("message-time");
+          messageTime.textContent = time;
+
+          if (sender !== username) {
+            const messageSender = document.createElement("div");
+            messageSender.classList.add("message-sender");
+            messageSender.textContent = sender;
+            messageElement.appendChild(messageSender);
+          }
+
+          messageElement.appendChild(messageText);
+          messageElement.appendChild(messageTime);
+          chatMessages.appendChild(messageElement);
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+
+          // Show "is typing" indicator for received messages
+          if (type === "received") {
+            setTimeout(() => {
+              typingIndicator.style.display = "none";
+            }, 1000);
+          }
+        }
+
+        // Send message function
+        function sendMessage() {
+          const text = messageInput.value.trim();
+          if (text) {
+            const time = new Date().toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            });
+
+            // Add message to UI immediately
+            addMessage(text, username, time, "sent");
+
+            // In a real app, you would send this via WebSocket
+            // socket.send(JSON.stringify({ text, sender: username }));
+
+            // Simulate response after a delay
+            setTimeout(() => {
+              typingIndicator.style.display = "inline-block";
+
+              setTimeout(() => {
+                const responses = [
+                  "That's interesting! Tell me more.",
+                  "I see what you mean. How does that work?",
+                  "Thanks for sharing that with me.",
+                  "Cool! What else have you been working on?",
+                  "That makes sense. Where did you learn about this?",
+                ];
+                const randomResponse =
+                  responses[Math.floor(Math.random() * responses.length)];
+                addMessage(
+                  randomResponse,
+                  "Bot",
+                  new Date().toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  }),
+                  "received"
+                );
+              }, 1000 + Math.random() * 2000);
+            }, 500 + Math.random() * 1500);
+
+            messageInput.value = "";
+            isTyping = false;
+          }
+        }
+
+        // Event listeners
+        sendButton.addEventListener("click", sendMessage);
+
+        messageInput.addEventListener("keypress", (e) => {
+          if (e.key === "Enter") {
+            sendMessage();
+          }
+        });
+
+        messageInput.addEventListener("input", () => {
+          const now = Date.now();
+          const typingTimeout = 2000; // 2 seconds
+
+          if (messageInput.value.trim()) {
+            if (!isTyping) {
+              isTyping = true;
+              // In a real app, notify other users that you're typing
+              // socket.send(JSON.stringify({ type: 'typing', sender: username }));
+            }
+            lastTypingTime = now;
+          } else {
+            isTyping = false;
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
