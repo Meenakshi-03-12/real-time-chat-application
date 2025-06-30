@@ -1,3 +1,22 @@
+    REAL-TIME CHAT APPLICATION
+                        
+                         
+COMPANY: CODTECH IT SOLUTIONS
+
+NAME: MEENAKSHI M
+
+INTERN ID:CT04DF2545
+
+DOMAIN: FRONTEND DEVELOPMENT
+
+DURATION: 4 WEEEKS
+
+MENTOR: NEELA SANTOSH
+
+
+                          TASK IMPLEMENTATION DETAILS
+
+                          
 This code implements a real-time chat application called "Chattrix." Key features include:
 
 WebSocket Integration: Connects to a WebSocket server for real-time messaging (mocked for demonstration).
@@ -20,3 +39,15 @@ Predefined messages simulate chat history for demonstration purposes.
 Responsive Design: Adapts to different screen sizes for optimal viewing on mobile devices.
 
 This application serves as a foundation for building a fully functional chat system with real-time capabilities.
+
+
+
+                                      OUTPUT:
+
+                                      
+![Image](https://github.com/user-attachments/assets/a008876c-ddfc-44c9-816b-33ba5d8ac4a6)
+
+
+
+
+
